@@ -129,6 +129,11 @@ and never duplicated.
 - `tools/probe-*.js` — diagnostics for sheet markup, hooks and storage.
 - [PLAN.md](./PLAN.md) — design notes and verified API facts (in Russian).
 
+Every push to the default branch publishes a release: the workflow bumps the patch version,
+writes the changelog from commit subjects, builds the archive and attaches installation
+instructions. Put `[skip release]` in a commit message to skip it, or fill in the `Unreleased`
+section of the changelog to write the release notes by hand.
+
 ## License
 
 [MIT](./LICENSE).

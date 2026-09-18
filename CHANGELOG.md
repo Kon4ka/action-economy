@@ -4,6 +4,22 @@ All notable changes to this module are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the module uses [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Two toggles in the sheet header menu: show the tracker for me, and show it for this character.
+- Tooltips on concentration pips naming what the character is currently holding.
+- Automated releases: every push to the default branch bumps the patch version, writes this
+  changelog and publishes a GitHub release with installation instructions.
+
+### Changed
+
+- The tracker is hidden for everyone until one of the two toggles is switched on.
+- Pips are a black socket with a coloured light inside; spending puts the light out and leaves
+  the socket in place.
+- Reaction is turquoise, concentration has its own drawn icon, pools deplete from the right.
+
 ## [0.1.0]
 
 First release.
