@@ -8,9 +8,11 @@
  * Иначе длинные пулы расталкивали бы кнопки отдыха и наезжали на подпись опыта.
  */
 
-import { MODULE_ID, POOLS, TRACKED_POOLS, canEdit, getMax, getPoolState, isTracked, resetPools, setSpent }
-  from "./state.mjs";
-import { visiblePools } from "./settings.mjs";
+import {
+  MODULE_ID, POOLS, TRACKED_POOLS, canEdit, getMax, getPoolState, isEnabledForActor, isTracked,
+  resetPools, setSpent, toggleForActor
+} from "./state.mjs";
+import { getSetting, toggleForMe, visiblePools } from "./settings.mjs";
 
 const WIDGET_CLASS = "action-economy-tracker";
 
@@ -82,6 +84,10 @@ function injectWidget(app, element) {
 
   // Частичная перерисовка ApplicationV2 может оставить прежний блок — убираем его всегда.
   root.querySelectorAll(`.${WIDGET_CLASS}`).forEach(node => node.remove());
+
+  // По умолчанию трекера нет ни у кого. Он появляется, если его включили для этого
+  // персонажа или пользователь включил его лично для себя — достаточно одного из двух.
+  if ( !isEnabledForActor(actor) && !getSetting("showForMe") ) return;
 
   const pools = visiblePools();
   if ( !pools.length ) return;
@@ -197,16 +203,40 @@ async function endConcentration(actor, index) {
 /*  Жёсткий оверрайд                            */
 /* -------------------------------------------- */
 
-/** Пункт в меню листа (три точки в шапке). */
+/**
+ * Пункты в меню листа (три точки в шапке): два независимых выключателя показа и
+ * настройки количества ресурсов.
+ */
 export function onGetHeaderControls(app, controls) {
   const actor = app?.document ?? app?.actor;
-  if ( !Array.isArray(controls) || !isTracked(actor) || !canEdit(actor) ) return;
-  if ( controls.some(c => c.action === "actionEconomyOverride") ) return;
+  if ( !Array.isArray(controls) || !isTracked(actor) ) return;
+  if ( controls.some(control => control.action === "actionEconomyToggleUser") ) return;
+
+  // Личный выключатель: виден всем, влияет только на этого пользователя.
+  const forMe = getSetting("showForMe");
+  controls.push({
+    icon: forMe ? "fa-solid fa-eye-slash" : "fa-solid fa-eye",
+    label: forMe ? "ACTION_ECONOMY.Toggle.hideForMe" : "ACTION_ECONOMY.Toggle.showForMe",
+    action: "actionEconomyToggleUser",
+    onClick: () => toggleForMe().catch(err => console.error(`${MODULE_ID} | переключение не удалось`, err))
+  });
+
+  // Выключатель персонажа и настройки количества — только владельцу листа.
+  if ( !canEdit(actor) ) return;
+
+  const forActor = isEnabledForActor(actor);
+  controls.push({
+    icon: forActor ? "fa-solid fa-user-slash" : "fa-solid fa-user-check",
+    label: forActor ? "ACTION_ECONOMY.Toggle.hideForActor" : "ACTION_ECONOMY.Toggle.showForActor",
+    action: "actionEconomyToggleActor",
+    onClick: () => toggleForActor(actor).catch(err => console.error(`${MODULE_ID} | переключение не удалось`, err))
+  });
+
   controls.push({
     icon: "fa-solid fa-circle-half-stroke",
     label: "ACTION_ECONOMY.Override.menu",
     action: "actionEconomyOverride",
-    onClick: () => openOverrideDialog(actor)
+    onClick: () => openOverrideDialog(actor).catch(err => console.error(`${MODULE_ID} | диалог не открылся`, err))
   });
 }
 

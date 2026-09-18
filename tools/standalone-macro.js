@@ -10,6 +10,10 @@
  *   - настройки не в интерфейсе Foundry, а константами в самом начале макроса;
  *   - у остальных игроков ничего не меняется, пока они не запустят макрос у себя.
  *
+ * Виджет по умолчанию не показывается никому. Включается в меню листа под тремя точками:
+ * «показывать у меня» — лично для этого пользователя на всех листах, «показывать у этого
+ * персонажа» — для всех на этом листе. Достаточно любого из двух.
+ *
  * Как пользоваться: запустить макрос — включится (появится уведомление). Запустить ещё раз —
  * выключится и уберёт виджет. После F5 запустить заново.
  *
@@ -121,6 +125,16 @@
       return false;
     }
   }
+
+  // Личный показ виджета: у модуля это клиентская настройка, здесь — localStorage,
+  // чтобы выбор был свой у каждого пользователя и переживал перезагрузку страницы.
+  const FOR_ME_KEY = `${MODULE_ID}.showForMe`;
+  const showsForMe = () => {
+    try { return localStorage.getItem(FOR_ME_KEY) === "1"; } catch { return false; }
+  };
+  const setShowsForMe = value => {
+    try { localStorage.setItem(FOR_ME_KEY, value ? "1" : "0"); } catch { /* приватный режим */ }
+  };
 
   // getFlag и setFlag требуют, чтобы scope был активным модулем, а модуль не установлен.
   // Поэтому читаем флаги напрямую, а пишем через update: там проверки scope нет.
@@ -287,6 +301,10 @@
 
     root.querySelectorAll(`.${WIDGET_CLASS}`).forEach(node => node.remove());
 
+    // По умолчанию трекера нет ни у кого: он появляется, если включён для этого персонажа
+    // либо лично для этого пользователя — достаточно одного из двух.
+    if ( (readFlag(actor, "enabled") !== true) && !showsForMe() ) return false;
+
     const pools = Object.keys(POOLS).filter(pool => SETTINGS.show[pool]);
     if ( !pools.length ) return false;
 
@@ -374,17 +392,49 @@
     await setSpent(actor, pool, dot.classList.contains("spent") ? spent - 1 : spent + 1);
   }
 
-  /** Пункт «Экономия действий» в меню листа (три точки). */
+  /** Пункты меню листа (три точки): два выключателя показа и настройки. */
   function onGetHeaderControls(app, controls) {
     const actor = app?.document ?? app?.actor;
-    if ( !isTracked(actor) || !actor.isOwner ) return;
-    if ( controls.some(control => control.action === "actionEconomySettings") ) return;
+    if ( !Array.isArray(controls) || !isTracked(actor) ) return;
+    if ( controls.some(control => control.action === "actionEconomyToggleUser") ) return;
+
+    const forMe = showsForMe();
+    controls.push({
+      icon: forMe ? "fa-solid fa-eye-slash" : "fa-solid fa-eye",
+      label: forMe ? "Экономия действий: скрыть у меня" : "Экономия действий: показывать у меня",
+      action: "actionEconomyToggleUser",
+      onClick: () => {
+        setShowsForMe(!forMe);
+        refreshSheets();
+      }
+    });
+
+    if ( !actor.isOwner ) return;
+
+    const forActor = readFlag(actor, "enabled") === true;
+    controls.push({
+      icon: forActor ? "fa-solid fa-user-slash" : "fa-solid fa-user-check",
+      label: forActor
+        ? "Экономия действий: скрыть у этого персонажа"
+        : "Экономия действий: показывать у этого персонажа",
+      action: "actionEconomyToggleActor",
+      onClick: () => writeFlags(actor, { enabled: !forActor })
+        .catch(err => console.error("Экономия действий: переключение не удалось", err))
+    });
+
     controls.push({
       icon: "fa-solid fa-circle-half-stroke",
       label: "Экономия действий",
       action: "actionEconomySettings",
       onClick: () => openSettingsDialog(actor)
     });
+  }
+
+  /** Перерисовать открытые листы персонажей. */
+  function refreshSheets() {
+    for ( const actor of game.actors ) {
+      if ( actor.sheet?.rendered ) actor.sheet.render(false);
+    }
   }
 
   /** Настройки макроса и жёсткий оверрайд для конкретного персонажа в одном окне. */

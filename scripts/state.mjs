@@ -141,6 +141,22 @@ export function isTracked(actor) {
   return actor?.type === "character";
 }
 
+/**
+ * Включён ли трекер на этом персонаже для всех. По умолчанию выключен: виджет появляется
+ * только после того, как его включили — либо для персонажа, либо лично для себя.
+ */
+export function isEnabledForActor(actor) {
+  return actor?.getFlag?.(MODULE_ID, "enabled") === true;
+}
+
+/** Переключить показ трекера для персонажа. Доступно владельцу листа. */
+export async function toggleForActor(actor) {
+  if ( !canEdit(actor) ) return false;
+  const next = !isEnabledForActor(actor);
+  await actor.setFlag(MODULE_ID, "enabled", next);
+  return next;
+}
+
 /** Участвует ли актёр в текущем бою. */
 export function isInCombat(actor) {
   if ( !actor ) return false;

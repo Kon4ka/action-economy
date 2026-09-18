@@ -19,7 +19,7 @@
   "ACTION_ECONOMY.Settings.show.reaction": "Show reaction",
   "ACTION_ECONOMY.Settings.show.concentration": "Show concentration",
   "ACTION_ECONOMY.Settings.showForMe.name": "Show the tracker for me",
-  "ACTION_ECONOMY.Settings.showForMe.hint": "Client setting: hides the tracker for this user only.",
+  "ACTION_ECONOMY.Settings.showForMe.hint": "Client setting: shows the tracker on every character sheet for this user. Off by default — turn the tracker on from the sheet header menu.",
   "ACTION_ECONOMY.Notify.spent": "{actor}: {pool} already spent.",
   "ACTION_ECONOMY.Notify.noPermission": "You cannot edit this character sheet.",
   "ACTION_ECONOMY.Confirm.title": "Resource spent",
@@ -35,5 +35,9 @@
   "ACTION_ECONOMY.Override.concentrationHint": "A native dnd5e field: the system maintains this many concentrations and only drops the oldest once the limit is reached. Currently, with effects: {value}.",
   "ACTION_ECONOMY.Override.saved": "Action economy: saved.",
   "ACTION_ECONOMY.Concentration.holding": "{name} — click to end",
-  "ACTION_ECONOMY.Concentration.free": "Free concentration slot"
+  "ACTION_ECONOMY.Concentration.free": "Free concentration slot",
+  "ACTION_ECONOMY.Toggle.showForMe": "Action economy: show for me",
+  "ACTION_ECONOMY.Toggle.hideForMe": "Action economy: hide for me",
+  "ACTION_ECONOMY.Toggle.showForActor": "Action economy: show for this character",
+  "ACTION_ECONOMY.Toggle.hideForActor": "Action economy: hide for this character"
 }

@@ -39,6 +39,18 @@ slot is free. Manual mode does not affect this — concentration always comes fr
 The tracker sits to the left of the rest buttons and takes no space in that row, so the header
 layout stays exactly as the system draws it.
 
+## Turning the tracker on
+
+**Nobody sees the tracker by default.** It is switched on from the sheet header menu, by two
+independent toggles — either one is enough:
+
+- **"Show for me"** — for this user only, on every character sheet at once. The same switch
+  lives in the module's client settings.
+- **"Show for this character"** — for everyone, on this sheet only. Available to the sheet's
+  owner and the GM; stored as a flag on the actor.
+
+Picking the same entry again turns it back off.
+
 ## Controls
 
 - **Click a free pip** — spend one.
@@ -80,7 +92,7 @@ the features onto sheets.
 - **Track outside combat** — whether resources are spent when there is no combat.
 - **Show action / bonus action / free action / reaction / concentration** — world settings:
   which resources exist on sheets at all.
-- **Show the tracker for me** — a per-client setting.
+- **Show the tracker for me** — the personal switch, off by default (see "Turning the tracker on").
 
 ## Scope and limits
 

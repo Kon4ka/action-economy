@@ -68,23 +68,32 @@ export function registerSettings(onChange) {
     });
   }
 
-  // Каждый игрок может скрыть виджет у себя.
+  // Личный выключатель. По умолчанию выключен: виджет не должен появляться у всех сам.
   game.settings.register(MODULE_ID, "showForMe", {
     name: "ACTION_ECONOMY.Settings.showForMe.name",
     hint: "ACTION_ECONOMY.Settings.showForMe.hint",
     scope: "client",
     config: true,
     type: Boolean,
-    default: true,
+    default: false,
     onChange: refresh
   });
 }
 
+/** Переключить личный показ трекера. */
+export async function toggleForMe() {
+  const next = !getSetting("showForMe");
+  await game.settings.set(MODULE_ID, "showForMe", next);
+  return next;
+}
+
 export const getSetting = key => game.settings.get(MODULE_ID, key);
 
-/** Видимые пулы с учётом мировых и личных настроек. */
+/**
+ * Какие ресурсы вообще показывать. Это мировой выбор мастера: какие строки есть в игре.
+ * Показывать ли сам виджет — отдельный вопрос, он решается выключателями в меню листа.
+ */
 export function visiblePools() {
-  if ( !getSetting("showForMe") ) return [];
   return Object.keys(POOLS).filter(pool => getSetting(showKey(pool)));
 }
 

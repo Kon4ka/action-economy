@@ -19,7 +19,7 @@
   "ACTION_ECONOMY.Settings.show.reaction": "Показывать реакцию",
   "ACTION_ECONOMY.Settings.show.concentration": "Показывать концентрацию",
   "ACTION_ECONOMY.Settings.showForMe.name": "Показывать виджет у меня",
-  "ACTION_ECONOMY.Settings.showForMe.hint": "Личная настройка: скрывает виджет только у этого пользователя.",
+  "ACTION_ECONOMY.Settings.showForMe.hint": "Личная настройка: показывает виджет на всех листах персонажей у этого пользователя. По умолчанию выключена — виджет включается в меню листа под тремя точками.",
   "ACTION_ECONOMY.Notify.spent": "{actor}: {pool} уже потрачено.",
   "ACTION_ECONOMY.Notify.noPermission": "Нет прав на изменение этого листа.",
   "ACTION_ECONOMY.Confirm.title": "Ресурс потрачен",
@@ -35,5 +35,9 @@
   "ACTION_ECONOMY.Override.concentrationHint": "Штатное поле D&D5e: система сама удержит столько концентраций и снимет старую только когда лимит исчерпан. Сейчас с учётом эффектов: {value}.",
   "ACTION_ECONOMY.Override.saved": "Экономия действий: сохранено.",
   "ACTION_ECONOMY.Concentration.holding": "{name} — клик, чтобы снять",
-  "ACTION_ECONOMY.Concentration.free": "Свободная концентрация"
+  "ACTION_ECONOMY.Concentration.free": "Свободная концентрация",
+  "ACTION_ECONOMY.Toggle.showForMe": "Экономия действий: показывать у меня",
+  "ACTION_ECONOMY.Toggle.hideForMe": "Экономия действий: скрыть у меня",
+  "ACTION_ECONOMY.Toggle.showForActor": "Экономия действий: показывать у этого персонажа",
+  "ACTION_ECONOMY.Toggle.hideForActor": "Экономия действий: скрыть у этого персонажа"
 }

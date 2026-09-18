@@ -1,46 +1,52 @@
 name: Release
 
-# Срабатывает, когда на GitHub опубликован релиз. Тег вида v0.1.0.
+# Каждый коммит в основную ветку выпускает релиз: поднимает патч-версию, дописывает
+# CHANGELOG из сообщений коммитов, собирает архив и публикует его на GitHub.
+# Чтобы коммит не выпускал релиз, добавь в его сообщение [skip release].
 on:
-  release:
-    types: [published]
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   MODULE_ID: action-economy
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    # Коммит самого workflow помечен [skip release], иначе релизы пошли бы по кругу.
+    if: "!contains(github.event.head_commit.message, '[skip release]')"
 
     steps:
-      - name: Checkout repository
+      - name: Забрать репозиторий с историей
         uses: actions/checkout@v4
-
-      # Версия берётся из тега: v0.1.0 → 0.1.0.
-      - name: Extract version from tag
-        id: version
-        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
-      # В манифест релиза подставляются версия и ссылки на файлы именно этого релиза,
-      # а горячая перезагрузка выключается: она нужна только при разработке.
-      - name: Fill in the manifest
-        uses: microsoft/variable-substitution@v1
         with:
-          files: module.json
+          fetch-depth: 0
+
+      - name: Поднять версию и собрать заметки
+        id: prepare
+        run: node .github/scripts/bump-and-changelog.mjs
+
+      - name: Зафиксировать версию и CHANGELOG в репозитории
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add module.json CHANGELOG.md
+          git commit -m "chore: релиз ${{ steps.prepare.outputs.tag }} [skip release]"
+          git tag "${{ steps.prepare.outputs.tag }}"
+          git push origin HEAD --tags
+
+      - name: Подготовить манифест релиза
         env:
-          version: ${{ steps.version.outputs.number }}
-          url: https://github.com/${{ github.repository }}
-          manifest: https://github.com/${{ github.repository }}/releases/latest/download/module.json
-          download: https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/${{ env.MODULE_ID }}.zip
-          readme: https://github.com/${{ github.repository }}/blob/main/README.md
-          changelog: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md
-          bugs: https://github.com/${{ github.repository }}/issues
-          flags.hotReload: false
+          RELEASE_TAG: ${{ steps.prepare.outputs.tag }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: node .github/scripts/manifest-for-release.mjs
 
       # В архив попадает только то, что нужно в мире: без планов, тестов и диагностики.
-      - name: Create ZIP archive
+      - name: Собрать архив
         run: zip -r ./${{ env.MODULE_ID }}.zip
           module.json
           scripts/
@@ -52,12 +58,11 @@ jobs:
           CHANGELOG.md
           LICENSE
 
-      - name: Attach files to the release
-        uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          omitNameDuringUpdate: true
-          omitBodyDuringUpdate: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.event.release.tag_name }}
-          artifacts: "./module.json, ./${{ env.MODULE_ID }}.zip"
+      - name: Опубликовать релиз
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.prepare.outputs.tag }}" \
+            --title "${{ steps.prepare.outputs.tag }}" \
+            --notes-file release-notes.md \
+            ./module.json ./${{ env.MODULE_ID }}.zip
