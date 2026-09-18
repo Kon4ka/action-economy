@@ -111,6 +111,11 @@ prototype wrapping, no libWrapper, no `CONFIG` changes, no data model changes, n
 custom document types — so the usual "two modules wrapped the same method" conflicts cannot
 happen here. Verified alongside Midi-QOL, DAE, Dnd5e Custom Skills and the Monks modules.
 
+Cost does not scale with the number of tokens: nothing hooks tokens, the canvas or the combat
+tracker. The hot path is the pool maths — 7–13 µs per widget render even for a character
+carrying 80 active effects, and 2–3 µs per activity use. Run `node tests/perf-test.cjs` to
+measure it yourself.
+
 ## How it works
 
 Spending happens on `dnd5e.postUseActivity`, after the usage is committed but before the attack

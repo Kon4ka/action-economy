@@ -59,16 +59,10 @@
   const ACTIVATION_TO_POOL = { action: "action", bonus: "bonus", reaction: "reaction" };
   const BASE = 1;
 
-  // Имена хуков отрисовки листа различаются между версиями ядра и модулями, которые
-  // подменяют лист. Слушаем все подходящие: вставка идемпотентная, лишний вызов безвреден.
-  const RENDER_HOOKS = [
-    "renderCharacterActorSheet",
-    "renderActorSheetV2",
-    "renderBaseActorSheet",
-    "renderActorSheet5eCharacter2",
-    "renderActorSheet",
-    "renderApplicationV2"
-  ];
+  // Хук уровня ядра: ApplicationV2 вызывает хуки для всей цепочки классов, поэтому базового
+  // имени достаточно и оно переживает переименования листов в D&D5e. Раньше тут был список
+  // из шести имён — виджет собирался по шесть раз на каждую перерисовку.
+  const RENDER_HOOKS = ["renderActorSheetV2", "renderActorSheet"];
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
   const range = count => Array.from({ length: count }, (_, index) => index);
