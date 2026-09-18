@@ -1,0 +1,110 @@
+/* Виджет экономии действий в шапке листа персонажа. */
+
+/*
+ * Ряд кнопок отдыха в шапке — 68×30 px, столбик из пяти строк выше и шире. Поэтому обёртка
+ * нулевой ширины: она ничего не занимает в ряду и не двигает кнопки отдыха, а сам список
+ * вынесен из потока — растёт влево от кнопок и вверх, в пустую часть шапки.
+ */
+.action-economy-tracker {
+  position: relative;
+  align-self: stretch;
+  width: 0;
+  min-width: 0;
+  font-size: var(--font-size-11, 11px);
+  line-height: 1;
+}
+
+.action-economy-tracker .ae-list {
+  position: absolute;
+  bottom: -12px;
+  right: 10px;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.action-economy-tracker .ae-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.action-economy-tracker .ae-icon {
+  width: 11px;
+  text-align: center;
+  font-size: 9px;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+/* Ширина ряда фиксирована под пять точек, лишние переносятся на новую строку. */
+.action-economy-tracker .ae-dots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  width: 66px;
+}
+
+/*
+ * Точка — это чёрное гнездо, которое видно всегда, и цветной огонёк внутри него.
+ * Ресурс потрачен — огонёк гаснет, гнездо остаётся на месте.
+ */
+.action-economy-tracker .ae-dot {
+  display: grid;
+  place-items: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: inset 0 0 0 1px #000, 0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.action-economy-tracker .ae-dot::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ae-color, #c8a96e);
+  transition: opacity 120ms ease;
+}
+
+.action-economy-tracker .ae-dot.spent::after {
+  opacity: 0;
+}
+
+/*
+ * Подсветка при наведении идёт от начала строки до точки под курсором:
+ * `:has(~ …)` выбирает все точки, за которыми где-то дальше стоит наведённая.
+ */
+.action-economy-tracker .ae-dot:hover,
+.action-economy-tracker .ae-dot:has(~ .ae-dot:hover) {
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Цвета ресурсов — как на образце пользователя. */
+.action-economy-tracker .ae-action { --ae-color: #57d07a; }
+.action-economy-tracker .ae-bonus { --ae-color: #e8813a; }
+.action-economy-tracker .ae-free { --ae-color: #3ba7e8; }
+.action-economy-tracker .ae-reaction { --ae-color: #2fd8c2; }
+.action-economy-tracker .ae-concentration { --ae-color: #e0489b; }
+
+.action-economy-tracker .ae-row .ae-icon { color: var(--ae-color); }
+
+/* Свой значок концентрации: обводка берёт цвет ресурса через currentColor. */
+.action-economy-tracker svg.ae-glyph {
+  width: 11px;
+  height: 12px;
+  overflow: visible;
+}
+
+/* Треугольник бонусного действия: в бесплатном наборе значков его нет, поворачиваем «play». */
+.action-economy-tracker .ae-bonus .ae-icon {
+  transform: rotate(-90deg);
+}
+
+/* Ряд кнопок отдыха выравниваем по центру, чтобы виджет не растягивал шапку. */
+.dnd5e2.sheet .sheet-header-buttons:has(.action-economy-tracker) {
+  align-items: center;
+}

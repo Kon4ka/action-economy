@@ -1,0 +1,64 @@
+{
+  "id": "action-economy",
+  "title": "Action Economy 5e",
+  "description": "Tracks actions, bonus actions, reactions, free actions and concentration right in the D&D 5e character sheet header. Spends them automatically when an activity is used, works with Midi-QOL, and pool sizes can be raised by Active Effects.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367"
+  },
+  "authors": [
+    {
+      "name": "Kon4ka",
+      "url": "https://github.com/Kon4ka"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/action-economy.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "lang/ru.json"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "manifest": "https://raw.githubusercontent.com/foundryvtt/dnd5e/master/system.json",
+        "compatibility": {
+          "minimum": "5.3.3",
+          "verified": "5.3.3"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "midi-qol",
+        "type": "module",
+        "reason": "Verified together with Midi-QOL 14.0.12. The module also works without it."
+      }
+    ]
+  },
+  "url": "https://github.com/Kon4ka/action-economy",
+  "manifest": "https://github.com/Kon4ka/action-economy/releases/latest/download/module.json",
+  "download": "https://github.com/Kon4ka/action-economy/releases/latest/download/action-economy.zip",
+  "readme": "https://github.com/Kon4ka/action-economy/blob/main/README.md",
+  "changelog": "https://github.com/Kon4ka/action-economy/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/Kon4ka/action-economy/issues",
+  "license": "LICENSE",
+  "flags": {
+    "hotReload": true
+  }
+}

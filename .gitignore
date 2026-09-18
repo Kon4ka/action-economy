@@ -1,0 +1,9 @@
+# Сборка релиза
+*.zip
+
+# Мусор редакторов и системы
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
