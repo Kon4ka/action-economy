@@ -2,7 +2,7 @@
   "id": "action-economy",
   "title": "Action Economy 5e",
   "description": "Tracks actions, bonus actions, reactions, free actions and concentration right in the D&D 5e character sheet header. Spends them automatically when an activity is used, works with Midi-QOL, and pool sizes can be raised by Active Effects.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "compatibility": {
     "minimum": "14",
     "verified": "14.367"
