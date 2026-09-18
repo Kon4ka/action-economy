@@ -60,7 +60,9 @@ Picking the same entry again turns it back off.
 - **Right-click the tracker** — the Action economy dialog: hard counts per resource and the
   concentration limit for this character. The same dialog lives in the sheet header menu.
 
-Pools refill on their own at the start of the character's turn and when combat ends.
+Pools refill on their own at the start of the character's turn, after a short or long rest, and
+when combat ends. The chat card's refund button gives the action back as well, and the matching
+consume button spends it again.
 
 ## Raising the pools with Active Effects
 
@@ -75,6 +77,11 @@ Pools refill on their own at the start of the character's turn and when combat e
 Add, Multiply, Upgrade, Downgrade and Override all work, priority is respected, and disabled
 or suppressed effects are ignored. The module reads the effects itself instead of relying on
 flag initialisation, so nothing is written into the actor's source data.
+
+An effect using the same key with Override and a value of **0** blocks the resource while it
+lasts. The row stays visible: the icon dims, the pips are replaced by a ban sign and the tooltip
+names the effect responsible. When the effect ends the resource comes back on its own — nothing
+is watched or remembered, the maximum is recomputed on every render.
 
 Multiple concentrations are a native dnd5e feature: when a new concentration starts, the system
 compares the number of active ones with `system.attributes.concentration.limit` and only drops

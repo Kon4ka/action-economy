@@ -22,7 +22,13 @@
       icon: "icons/magic/light/explosion-star-glow-pink.webp",
       // Предел концентрации — штатное поле системы, свой флаг тут не нужен.
       key: "system.attributes.concentration.limit"
-    }
+    },
+
+    // Запреты: обнуляют пул, пока эффект висит. Снимется эффект — пул вернётся сам.
+    { name: "Реакция недоступна", pool: "reaction", block: true, icon: "icons/svg/unconscious.svg" },
+    { name: "Действие недоступно", pool: "action", block: true, icon: "icons/svg/paralysis.svg" },
+    { name: "Бонусное действие недоступно", pool: "bonus", block: true, icon: "icons/svg/net.svg" },
+    { name: "Свободное действие недоступно", pool: "free", block: true, icon: "icons/svg/silenced.svg" }
   ];
 
   if ( !game.user.isGM ) return ui.notifications.error("Создавать особенности может только мастер.");
@@ -36,20 +42,26 @@
   for ( const entry of ENTRIES ) {
     if ( existing.has(entry.name) ) continue;
     const key = entry.key ?? `flags.${MODULE_ID}.max.${entry.pool}`;
+    const change = entry.block
+      ? { key, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "0", priority: 40 }
+      : { key, mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "1", priority: 20 };
+    const description = entry.block
+      ? `<p>Пока эффект висит, ресурс «${entry.pool}» недоступен. Снимется эффект — вернётся сам.`
+        + ` Ключ эффекта: <code>${key}</code>, режим «Переопределить», значение 0.</p>`
+      : `<p>Повышает количество ресурса «${entry.pool}» на единицу. Ключ эффекта: <code>${key}</code>.</p>`;
+
     payload.push({
       name: entry.name,
       type: "feat",
       img: entry.icon,
       folder: folder.id,
-      system: {
-        description: { value: `<p>Повышает количество ресурса «${entry.pool}» на единицу. Ключ эффекта: <code>${key}</code>.</p>` }
-      },
+      system: { description: { value: description } },
       effects: [{
         name: entry.name,
         img: entry.icon,
         disabled: false,
         transfer: true,
-        changes: [{ key, mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "1", priority: 20 }]
+        changes: [change]
       }]
     });
   }

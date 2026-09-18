@@ -13,6 +13,11 @@ and the module uses [semantic versioning](https://semver.org/).
 - Tooltips on concentration pips naming what the character is currently holding.
 - Automated releases: every push to the default branch bumps the patch version, writes this
   changelog and publishes a GitHub release with installation instructions.
+- A short or long rest now refills every pool, through the `dnd5e.restCompleted` hook.
+- The chat card refund button returns the spent action, bonus action or reaction; the consume
+  button spends it again.
+- Effects can block a pool outright: Override with 0 dims the row and shows a ban sign naming
+  the effect, and the pool returns by itself once the effect ends.
 
 ### Changed
 

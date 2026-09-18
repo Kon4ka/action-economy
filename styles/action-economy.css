@@ -92,6 +92,22 @@
 
 .action-economy-tracker .ae-row .ae-icon { color: var(--ae-color); }
 
+/* Пул, обнулённый эффектом: значок гаснет, вместо точек — запрещающий знак. */
+.action-economy-tracker .ae-row.blocked {
+  cursor: default;
+}
+
+.action-economy-tracker .ae-row.blocked .ae-icon {
+  opacity: 0.4;
+}
+
+.action-economy-tracker .ae-blocked {
+  font-size: 8px;
+  color: var(--ae-color);
+  opacity: 0.75;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
 /* Свой значок концентрации: обводка берёт цвет ресурса через currentColor. */
 .action-economy-tracker svg.ae-glyph {
   width: 11px;

@@ -81,6 +81,29 @@ export function getMax(actor, pool) {
   return Math.max(0, Math.floor(value));
 }
 
+/**
+ * Эффекты, которые обнулили пул, то есть запрещают им пользоваться.
+ *
+ * Отдельного механизма блокировки в модуле нет и не нужно: эффект с ключом пула, режимом
+ * «Переопределить» и значением 0 обнуляет максимум, пока он висит. Как только эффект
+ * кончился или его сняли, пул возвращается сам — максимум считается заново при каждой
+ * отрисовке, ничего запоминать и сторожить не требуется.
+ */
+export function blockingEffects(actor, pool) {
+  if ( POOLS[pool]?.system ) return [];
+  const key = `flags.${MODULE_ID}.max.${pool}`;
+  const MODES = CONST.ACTIVE_EFFECT_MODES;
+  const names = [];
+  for ( const effect of actor.appliedEffects ) {
+    for ( const change of effect.changes ) {
+      if ( change.key !== key ) continue;
+      const blocks = [MODES.OVERRIDE, MODES.DOWNGRADE, MODES.CUSTOM, MODES.MULTIPLY].includes(change.mode);
+      if ( blocks && (Number(change.value) === 0) ) names.push(effect.name);
+    }
+  }
+  return names;
+}
+
 /** Сколько пула уже потрачено. */
 export function getSpent(actor, pool) {
   if ( pool === "concentration" ) return actor.concentration?.effects?.size ?? 0;

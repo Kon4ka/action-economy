@@ -39,5 +39,7 @@
   "ACTION_ECONOMY.Toggle.showForMe": "Action economy: show for me",
   "ACTION_ECONOMY.Toggle.hideForMe": "Action economy: hide for me",
   "ACTION_ECONOMY.Toggle.showForActor": "Action economy: show for this character",
-  "ACTION_ECONOMY.Toggle.hideForActor": "Action economy: hide for this character"
+  "ACTION_ECONOMY.Toggle.hideForActor": "Action economy: hide for this character",
+  "ACTION_ECONOMY.Notify.blocked": "{pool}: not available right now.",
+  "ACTION_ECONOMY.Notify.blockedBy": "{pool}: blocked by {effects}."
 }

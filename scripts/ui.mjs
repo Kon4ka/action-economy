@@ -9,7 +9,7 @@
  */
 
 import {
-  MODULE_ID, POOLS, TRACKED_POOLS, canEdit, getMax, getPoolState, isEnabledForActor, isTracked,
+  MODULE_ID, POOLS, TRACKED_POOLS, blockingEffects, canEdit, getMax, getPoolState, isEnabledForActor, isTracked,
   resetPools, setSpent, toggleForActor
 } from "./state.mjs";
 import { getSetting, toggleForMe, visiblePools } from "./settings.mjs";
@@ -127,12 +127,23 @@ function buildWidget(actor, pools) {
 
   for ( const pool of pools ) {
     const { max, spent } = getPoolState(actor, pool);
-    if ( max <= 0 ) continue;
-
     const label = game.i18n.localize(POOLS[pool].label);
     const row = document.createElement("div");
     row.classList.add("ae-row", `ae-${pool}`);
     row.dataset.pool = pool;
+
+    // Пул обнулён эффектом — показываем, что он недоступен, вместо того чтобы прятать строку.
+    if ( max <= 0 ) {
+      const blocking = blockingEffects(actor, pool);
+      const tooltip = blocking.length
+        ? game.i18n.format("ACTION_ECONOMY.Notify.blockedBy", { pool: label, effects: blocking.join(", ") })
+        : game.i18n.format("ACTION_ECONOMY.Notify.blocked", { pool: label });
+      row.classList.add("blocked");
+      row.innerHTML = `${iconMarkup(pool, tooltip)}`
+        + `<i class="ae-blocked fa-solid fa-ban" data-tooltip="${escapeHtml(tooltip)}"></i>`;
+      list.append(row);
+      continue;
+    }
 
     // Тратится справа налево: чёрными становятся последние точки.
     const tooltips = (pool === "concentration") ? concentrationTooltips(actor, max) : null;

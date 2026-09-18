@@ -39,5 +39,7 @@
   "ACTION_ECONOMY.Toggle.showForMe": "Экономия действий: показывать у меня",
   "ACTION_ECONOMY.Toggle.hideForMe": "Экономия действий: скрыть у меня",
   "ACTION_ECONOMY.Toggle.showForActor": "Экономия действий: показывать у этого персонажа",
-  "ACTION_ECONOMY.Toggle.hideForActor": "Экономия действий: скрыть у этого персонажа"
+  "ACTION_ECONOMY.Toggle.hideForActor": "Экономия действий: скрыть у этого персонажа",
+  "ACTION_ECONOMY.Notify.blocked": "{pool}: сейчас недоступно.",
+  "ACTION_ECONOMY.Notify.blockedBy": "{pool}: недоступно — {effects}."
 }

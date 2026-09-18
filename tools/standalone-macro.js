@@ -187,6 +187,26 @@
     return Math.max(0, Math.floor(value));
   }
 
+  /**
+   * Эффекты, обнулившие пул. Отдельного механизма блокировки нет и не нужно: эффект
+   * с ключом пула, режимом «Переопределить» и значением 0 запрещает пул, пока висит,
+   * а когда кончится — пул вернётся сам, максимум считается заново при каждой отрисовке.
+   */
+  function blockingEffects(actor, pool) {
+    if ( POOLS[pool]?.system ) return [];
+    const key = `flags.${MODULE_ID}.max.${pool}`;
+    const MODES = CONST.ACTIVE_EFFECT_MODES;
+    const names = [];
+    for ( const effect of actor.appliedEffects ) {
+      for ( const change of effect.changes ) {
+        if ( change.key !== key ) continue;
+        const blocks = [MODES.OVERRIDE, MODES.DOWNGRADE, MODES.CUSTOM, MODES.MULTIPLY].includes(change.mode);
+        if ( blocks && (Number(change.value) === 0) ) names.push(effect.name);
+      }
+    }
+    return names;
+  }
+
   function getSpent(actor, pool) {
     if ( pool === "concentration" ) return actor.concentration?.effects?.size ?? 0;
     return Math.max(0, Math.floor(Number(readFlag(actor, `spent.${pool}`) ?? 0) || 0));
@@ -244,6 +264,11 @@
       .${WIDGET_CLASS} .ae-icon { width: 11px; text-align: center; font-size: 9px; color: var(--ae-color);
         filter: drop-shadow(0 0 2px rgba(0,0,0,.8)); }
       .${WIDGET_CLASS} svg.ae-glyph { width: 11px; height: 12px; overflow: visible; }
+      /* Пул, обнулённый эффектом. */
+      .${WIDGET_CLASS} .ae-row.blocked { cursor: default; }
+      .${WIDGET_CLASS} .ae-row.blocked .ae-icon { opacity: .4; }
+      .${WIDGET_CLASS} .ae-blocked { font-size: 8px; color: var(--ae-color); opacity: .75;
+        filter: drop-shadow(0 0 2px rgba(0,0,0,.8)); }
       /* Ширина ряда точек фиксирована под пять штук, лишние переносятся на новую строку:
          так длинные пулы не растягивают виджет вбок. */
       .${WIDGET_CLASS} .ae-dots { display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
@@ -318,11 +343,27 @@
 
     for ( const pool of pools ) {
       const { max, spent } = getPoolState(actor, pool);
-      if ( max <= 0 ) continue;
       const row = document.createElement("div");
       row.classList.add("ae-row", `ae-${pool}`);
       row.dataset.pool = pool;
       row.style.setProperty("--ae-color", POOLS[pool].color);
+
+      // Пул обнулён эффектом — показываем, что он недоступен, а не прячем строку.
+      if ( max <= 0 ) {
+        const blocking = blockingEffects(actor, pool);
+        const tooltip = escapeHtml(blocking.length
+          ? `${POOLS[pool].label}: недоступно — ${blocking.join(", ")}`
+          : `${POOLS[pool].label}: сейчас недоступно`);
+        row.classList.add("blocked");
+        row.innerHTML = (POOLS[pool].glyph
+          ? `<svg class="ae-icon ae-glyph" viewBox="0 0 24 24" data-tooltip="${tooltip}" fill="none"`
+            + ` stroke="currentColor" stroke-width="2.2" stroke-linecap="round"`
+            + ` stroke-linejoin="round">${CONCENTRATION_GLYPH}</svg>`
+          : `<i class="ae-icon ${POOLS[pool].icon}" data-tooltip="${tooltip}"></i>`)
+          + `<i class="ae-blocked fa-solid fa-ban" data-tooltip="${tooltip}"></i>`;
+        list.append(row);
+        continue;
+      }
       // Тратится справа налево: чёрными становятся последние точки.
       // На точках концентрации подсказка говорит, что именно держит персонаж.
       const tooltips = (pool === "concentration") ? concentrationTooltips(actor, max) : null;
@@ -578,9 +619,16 @@
       return true;
     }
 
-    if ( getPoolState(actor, pool).available > 0 ) return true;
+    const state = getPoolState(actor, pool);
+    if ( state.available > 0 ) return true;
 
-    const message = `${actor.name}: ${POOLS[pool].label} уже потрачено.`;
+    // Обнулённый эффектом пул — это не «потрачено», а «запрещено».
+    const blocking = (state.max <= 0) ? blockingEffects(actor, pool) : [];
+    const message = (state.max <= 0)
+      ? (blocking.length
+        ? `${POOLS[pool].label}: недоступно — ${blocking.join(", ")}.`
+        : `${POOLS[pool].label}: сейчас недоступно.`)
+      : `${actor.name}: ${POOLS[pool].label} уже потрачено.`;
     ui.notifications.warn(message);
     if ( SETTINGS.shortage === "notify" ) return true;
 
@@ -627,6 +675,32 @@
     }
   }
 
+  /** Отдых восстанавливает всё: хук общий для короткого и продолжительного. */
+  function onRestCompleted(actor) {
+    if ( isTracked(actor) && actor.isOwner ) resetPools(actor).catch(console.error);
+  }
+
+  /**
+   * Кнопки «Возврат ресурса» и «Расход ресурса» на карточке использования. Своего хука
+   * у них нет: система чистит `system.deltas` у сообщения, обратная кнопка их возвращает.
+   */
+  function onUsageMessageUpdate(message, changed, options, userId) {
+    if ( SETTINGS.manualMode || (userId !== game.user.id) ) return;
+    if ( !foundry.utils.hasProperty(changed, "system.deltas") ) return;
+
+    const activity = message.system?.activity;
+    if ( !activity?.activation ) return;
+
+    const actor = message.system?.actor ?? activity.actor;
+    const pool = poolFor(activity);
+    if ( !pool || !shouldTrack(actor) ) return;
+
+    const refunded = foundry.utils.getProperty(changed, "system.deltas") === null;
+    const spent = getSpent(actor, pool);
+    setSpent(actor, pool, refunded ? spent - 1 : spent + 1)
+      .catch(err => console.error("Экономия действий: не удалось вернуть ресурс", err));
+  }
+
   /* ==========================================================================
      Включение
      ========================================================================== */
@@ -640,6 +714,8 @@
     ["dnd5e.postUseActivity", onPostUseActivity],
     ["updateCombat", onUpdateCombat],
     ["deleteCombat", onDeleteCombat],
+    ["dnd5e.restCompleted", onRestCompleted],
+    ["updateChatMessage", onUsageMessageUpdate],
     // Имя хука меню заголовка подтверждено диагностикой на живом листе.
     ["getHeaderControlsCharacterActorSheet", onGetHeaderControls]
   ].map(([hook, fn]) => [hook, Hooks.on(hook, fn)]);
