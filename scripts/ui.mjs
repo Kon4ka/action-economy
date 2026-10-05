@@ -126,6 +126,7 @@ function buildWidget(actor, pools) {
   widget.append(list);
 
   for ( const pool of pools ) {
+    if ( pool === "extraAttack" && pools.includes("action") ) continue;
     const { max, spent } = getPoolState(actor, pool);
     const label = game.i18n.localize(POOLS[pool].label);
     const row = document.createElement("div");
@@ -134,6 +135,7 @@ function buildWidget(actor, pools) {
 
     // Пул обнулён эффектом — показываем, что он недоступен, вместо того чтобы прятать строку.
     if ( max <= 0 ) {
+      if ( pool === "extraAttack" ) continue;
       const blocking = blockingEffects(actor, pool);
       const tooltip = blocking.length
         ? game.i18n.format("ACTION_ECONOMY.Notify.blockedBy", { pool: label, effects: blocking.join(", ") })
@@ -142,6 +144,7 @@ function buildWidget(actor, pools) {
       row.innerHTML = `${iconMarkup(pool, tooltip)}`
         + `<i class="ae-blocked fa-solid fa-ban" data-tooltip="${escapeHtml(tooltip)}"></i>`;
       list.append(row);
+      if ( pool === "action" && pools.includes("extraAttack") ) appendExtraAttacks(actor, row);
       continue;
     }
 
@@ -155,9 +158,24 @@ function buildWidget(actor, pools) {
     }).join("");
 
     row.innerHTML = `${iconMarkup(pool, `${label}: ${max - spent}/${max}`)}<span class="ae-dots">${dots}</span>`;
+    if ( pool === "action" && pools.includes("extraAttack") ) appendExtraAttacks(actor, row);
     list.append(row);
   }
   return widget;
+}
+
+function appendExtraAttacks(actor, row) {
+  const { max, spent, available } = getPoolState(actor, "extraAttack");
+  if ( max <= 0 ) return;
+  const label = game.i18n.localize(POOLS.extraAttack.label);
+  const group = document.createElement("span");
+  group.className = "ae-dots ae-extraAttack ae-extra-attacks";
+  group.dataset.pool = "extraAttack";
+  group.innerHTML = range(max).map(index =>
+    `<span class="ae-dot${index >= max - spent ? " spent" : ""}" data-index="${index}"`
+    + ` data-tooltip="${escapeHtml(`${label}: ${available}/${max}`)}"></span>`
+  ).join("");
+  row.append(group);
 }
 
 /* -------------------------------------------- */
@@ -168,7 +186,7 @@ async function onClick(event, actor) {
   try {
     const row = event.target.closest(".ae-row");
     if ( !row ) return;
-    const pool = row.dataset.pool;
+    const pool = event.target.closest("[data-pool]")?.dataset.pool ?? row.dataset.pool;
 
     if ( !canEdit(actor) ) return ui.notifications.warn(game.i18n.localize("ACTION_ECONOMY.Notify.noPermission"));
 

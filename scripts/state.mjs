@@ -14,6 +14,7 @@ const CONCENTRATION_GLYPH = '<circle cx="12" cy="9" r="7"/><path d="M12 11.5V22.
 /** Пулы в порядке отрисовки. `system: true` — значение целиком ведёт система D&D5e. */
 export const POOLS = {
   action: { icon: "fa-solid fa-circle", label: "ACTION_ECONOMY.Pool.action" },
+  extraAttack: { icon: "fa-solid fa-circle", label: "ACTION_ECONOMY.Pool.extraAttack", base: 0 },
   bonus: { icon: "fa-solid fa-play", label: "ACTION_ECONOMY.Pool.bonus" },
   free: { icon: "fa-solid fa-droplet", label: "ACTION_ECONOMY.Pool.free" },
   reaction: { icon: "fa-solid fa-arrow-rotate-left", label: "ACTION_ECONOMY.Pool.reaction" },
@@ -21,7 +22,7 @@ export const POOLS = {
 };
 
 /** Пулы, траты которых хранит сам модуль. */
-export const TRACKED_POOLS = ["action", "bonus", "free", "reaction"];
+export const TRACKED_POOLS = ["action", "extraAttack", "bonus", "free", "reaction"];
 
 /** Тип активации Activity → пул. Всё остальное (`special`, время, отдых) ничего не стоит. */
 export const ACTIVATION_TO_POOL = {
@@ -35,6 +36,15 @@ const BASE = 1;
 
 /** Свои мелкие помощники: глобальные расширения ядра между версиями переезжают. */
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+// D&D5e 5.x uses string operation types; older effects use numeric modes.
+function effectChanges(effect) {
+  const types = { custom: 0, multiply: 1, add: 2, downgrade: 3, upgrade: 4, override: 5 };
+  return Array.from(effect.changes ?? effect.system?.changes ?? [], change => {
+    const mode = types[change.type] ?? change.mode;
+    return { ...change, mode, priority: change.priority ?? (mode * 10) };
+  });
+}
 
 /* -------------------------------------------- */
 /*  Расчёт                                      */
@@ -58,14 +68,14 @@ export function getMax(actor, pool) {
   const key = `flags.${MODULE_ID}.max.${pool}`;
   const changes = [];
   for ( const effect of actor.appliedEffects ) {
-    for ( const change of effect.changes ) {
+    for ( const change of effectChanges(effect) ) {
       if ( change.key === key ) changes.push({ ...change, priority: change.priority ?? (change.mode * 10) });
     }
   }
   changes.sort((a, b) => a.priority - b.priority);
 
   const MODES = CONST.ACTIVE_EFFECT_MODES;
-  let value = BASE;
+  let value = POOLS[pool]?.base ?? BASE;
   for ( const change of changes ) {
     const delta = Number(change.value);
     if ( !Number.isFinite(delta) ) continue;
@@ -95,7 +105,7 @@ export function blockingEffects(actor, pool) {
   const MODES = CONST.ACTIVE_EFFECT_MODES;
   const names = [];
   for ( const effect of actor.appliedEffects ) {
-    for ( const change of effect.changes ) {
+    for ( const change of effectChanges(effect) ) {
       if ( change.key !== key ) continue;
       const blocks = [MODES.OVERRIDE, MODES.DOWNGRADE, MODES.CUSTOM, MODES.MULTIPLY].includes(change.mode);
       if ( blocks && (Number(change.value) === 0) ) names.push(effect.name);

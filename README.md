@@ -149,3 +149,5 @@ section of the changelog to write the release notes by hand.
 ## License
 
 [MIT](./LICENSE).
+
+Extra attacks use yellow pips beside green action pips, with a zero base and a separate character override. Effect: flags.action-economy.max.extraAttack, Add, 1. Click to spend/refund; turn start and rest reset the pool. Activity automation still spends actions; extra attacks are tracked manually. Existing max.action effects are not migrated automatically.

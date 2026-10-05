@@ -1,5 +1,7 @@
 {
   "ACTION_ECONOMY.Pool.action": "Action",
+  "ACTION_ECONOMY.Pool.extraAttack": "Extra attacks",
+  "ACTION_ECONOMY.Settings.show.extraAttack": "Show extra attacks",
   "ACTION_ECONOMY.Pool.bonus": "Bonus Action",
   "ACTION_ECONOMY.Pool.free": "Free Action",
   "ACTION_ECONOMY.Pool.reaction": "Reaction",

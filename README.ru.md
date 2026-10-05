@@ -79,6 +79,7 @@ https://github.com/Kon4ka/action-economy/releases/latest/download/module.json
 
 ```
 flags.action-economy.max.action      Режим «Прибавить», значение 1
+flags.action-economy.max.extraAttack Режим «Прибавить», значение 1
 flags.action-economy.max.bonus
 flags.action-economy.max.reaction
 flags.action-economy.max.free
@@ -158,3 +159,5 @@ CHANGELOG из сообщений коммитов, собирает архив 
 ## Лицензия
 
 [MIT](./LICENSE).
+
+Дополнительные атаки: жёлтые кружочки рядом с зелёными основными действиями. По умолчанию их 0; отдельное поле в меню «Экономия действий» задаёт количество. Флаг эффекта: flags.action-economy.max.extraAttack, Добавить, 1. Клик расходует или возвращает атаку; начало хода и отдых восстанавливают счётчик. Автоматический расход Activity продолжает учитывать основное действие; дополнительные атаки отмечаются вручную. Старый эффект max.action автоматически не переносится: замените его ключ на max.extraAttack.

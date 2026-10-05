@@ -62,7 +62,14 @@ const change = (pool, mode, value, priority) => ({
 
   // База — по одному на каждый пул.
   const plain = makeActor();
-  for ( const pool of state.TRACKED_POOLS ) assert.equal(state.getMax(plain, pool), 1, `база ${pool}`);
+  for ( const pool of state.TRACKED_POOLS ) assert.equal(state.getMax(plain, pool), pool === "extraAttack" ? 0 : 1, `база ${pool}`);
+  const extra = makeActor({ effects: [{ changes: [{ key: "flags.action-economy.max.extraAttack", type: "add", value: 1 }] }] });
+  assert.equal(state.getMax(extra, "extraAttack"), 1);
+  assert.equal(state.getMax(extra, "action"), 1, "extra attacks do not grant actions");
+  await state.spend(extra, "extraAttack");
+  assert.equal(state.getPoolState(extra, "extraAttack").available, 0);
+  await state.resetPools(extra);
+  assert.equal(state.getPoolState(extra, "extraAttack").available, 1);
 
   // Эффекты складываются.
   const buffed = makeActor({
@@ -74,6 +81,14 @@ const change = (pool, mode, value, priority) => ({
   assert.equal(state.getMax(buffed, "bonus"), 3, "два эффекта по +1 к бонусному действию");
   assert.equal(state.getMax(buffed, "action"), 2, "+1 к основному действию");
   assert.equal(state.getMax(buffed, "reaction"), 1, "нетронутый пул остаётся базовым");
+
+  const modern = makeActor({ effects: [
+    { changes: [{ key: "flags.action-economy.max.action", type: "add", value: 1, priority: 20 }] },
+    { name: "Blocked", system: { changes: [{ key: "flags.action-economy.max.reaction", type: "override", value: 0 }] } }
+  ] });
+  assert.equal(state.getMax(modern, "action"), 2, "D&D5e string add increases the pool");
+  assert.equal(state.getMax(modern, "reaction"), 0, "system.changes override blocks the pool");
+  assert.equal(state.blockingEffects(modern, "reaction").length, 1, "modern blocking effect is detected");
 
   // Режимы: Upgrade не опускает, Override задаёт, приоритет соблюдается.
   const modes = makeActor({

@@ -1,5 +1,7 @@
 {
   "ACTION_ECONOMY.Pool.action": "Основное действие",
+  "ACTION_ECONOMY.Pool.extraAttack": "Дополнительные атаки",
+  "ACTION_ECONOMY.Settings.show.extraAttack": "Показывать дополнительные атаки",
   "ACTION_ECONOMY.Pool.bonus": "Бонусное действие",
   "ACTION_ECONOMY.Pool.free": "Свободное действие",
   "ACTION_ECONOMY.Pool.reaction": "Реакция",
