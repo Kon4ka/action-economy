@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the module uses [semantic versioning](https://semver.org/).
 
 
+## [0.1.5] — 2026-10-05
+
+- fix: pack extra attacks after green pips and remove spent attack pips
+- feat: add yellow extra attack pips and separate counter; fix modern effect operations
+
 ## [0.1.4] — 2026-09-18
 
 - fix: reaction
