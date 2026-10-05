@@ -150,8 +150,8 @@ function buildWidget(actor, pools) {
 
     // Тратится справа налево: чёрными становятся последние точки.
     const tooltips = (pool === "concentration") ? concentrationTooltips(actor, max) : null;
-    const dots = range(max).map(index => {
-      const used = index >= (max - spent);
+    const dots = range((pool === "action" || pool === "extraAttack") ? max - spent : max).map(index => {
+      const used = pool !== "action" && pool !== "extraAttack" && index >= (max - spent);
       const tooltip = tooltips?.[index];
       return `<span class="ae-dot${used ? " spent" : ""}" data-index="${index}"`
         + `${tooltip ? ` data-tooltip="${escapeHtml(tooltip)}"` : ""}></span>`;
@@ -171,8 +171,8 @@ function appendExtraAttacks(actor, row) {
   const group = document.createElement("span");
   group.className = "ae-dots ae-extraAttack ae-extra-attacks";
   group.dataset.pool = "extraAttack";
-  group.innerHTML = range(max).map(index =>
-    `<span class="ae-dot${index >= max - spent ? " spent" : ""}" data-index="${index}"`
+  group.innerHTML = range(available).map(index =>
+    `<span class="ae-dot" data-index="${index}"`
     + ` data-tooltip="${escapeHtml(`${label}: ${available}/${max}`)}"></span>`
   ).join("");
   row.append(group);
@@ -193,7 +193,7 @@ async function onClick(event, actor) {
     // Клик по значку — полностью восстановить пул.
     if ( event.target.closest(".ae-icon") ) {
       if ( pool === "concentration" ) return;
-      return await resetPools(actor, [pool]);
+      return await resetPools(actor, pool === "action" ? ["action", "extraAttack"] : [pool]);
     }
 
     const dot = event.target.closest(".ae-dot");

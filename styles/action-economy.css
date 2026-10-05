@@ -86,7 +86,11 @@
 /* Цвета ресурсов — как на образце пользователя. */
 .action-economy-tracker .ae-action { --ae-color: #57d07a; }
 .action-economy-tracker .ae-extraAttack { --ae-color: #f4d34f; }
-.action-economy-tracker .ae-extra-attacks { width: auto; max-width: 66px; margin-left: 3px; }
+.action-economy-tracker .ae-action > .ae-dots,
+.action-economy-tracker .ae-extraAttack > .ae-dots,
+.action-economy-tracker .ae-extra-attacks { width: auto; max-width: 66px; }
+.action-economy-tracker .ae-action > .ae-dots:empty { display: none; }
+.action-economy-tracker .ae-action { gap: 5px; }
 .action-economy-tracker .ae-bonus { --ae-color: #e8813a; }
 .action-economy-tracker .ae-free { --ae-color: #3ba7e8; }
 .action-economy-tracker .ae-reaction { --ae-color: #2fd8c2; }
