@@ -12,7 +12,7 @@ import {
   MODULE_ID, POOLS, TRACKED_POOLS, blockingEffects, canEdit, getMax, getPoolState, isEnabledForActor, isTracked,
   resetPools, setSpent, toggleForActor
 } from "./state.mjs";
-import { getSetting, toggleForMe, visiblePools } from "./settings.mjs";
+import { getSetting, isShown, toggleForMe, visiblePools } from "./settings.mjs";
 
 const WIDGET_CLASS = "action-economy-tracker";
 
@@ -87,7 +87,7 @@ function injectWidget(app, element) {
 
   // По умолчанию трекера нет ни у кого. Он появляется, если его включили для этого
   // персонажа или пользователь включил его лично для себя — достаточно одного из двух.
-  if ( !isEnabledForActor(actor) && !getSetting("showForMe") ) return;
+  if ( !isShown(actor) ) return;
 
   const pools = visiblePools();
   if ( !pools.length ) return;

@@ -2,7 +2,7 @@
  * Настройки модуля.
  */
 
-import { MODULE_ID, POOLS } from "./state.mjs";
+import { MODULE_ID, POOLS, isEnabledForActor } from "./state.mjs";
 
 /** Что делать, когда ресурс кончился. */
 export const SHORTAGE = {
@@ -95,6 +95,15 @@ export const getSetting = key => game.settings.get(MODULE_ID, key);
  */
 export function visiblePools() {
   return Object.keys(POOLS).filter(pool => getSetting(showKey(pool)));
+}
+
+/**
+ * Виден ли трекер этого персонажа текущему пользователю: включён для персонажа или лично
+ * для себя — достаточно одного из двух. Это же правило решает, показывать ли
+ * предупреждение о нехватке: у выключенного трекера его быть не должно.
+ */
+export function isShown(actor) {
+  return isEnabledForActor(actor) || getSetting("showForMe");
 }
 
 /** Списывает ли модуль ресурсы сам. */

@@ -12,7 +12,7 @@ import {
   ACTIVATION_TO_POOL, MODULE_ID, POOLS, blockingEffects, getPoolState, getSpent, isInCombat, isTracked, resetPools,
   setSpent, spend
 } from "./state.mjs";
-import { SHORTAGE, getSetting, isAutomatic } from "./settings.mjs";
+import { SHORTAGE, getSetting, isAutomatic, isShown } from "./settings.mjs";
 
 /** Зарегистрированные хуки: имя → id, чтобы снимать их при смене настроек. */
 const registered = new Map();
@@ -84,6 +84,10 @@ function onPreUseActivity(activity, usageConfig, dialogConfig, messageConfig) {
   const actor = actorFor(activity);
   const pool = poolFor(activity);
   if ( !pool || !shouldTrack(actor) ) return true;
+
+  // Трекер у этого персонажа выключен — предупреждать не о чем. Списание при этом
+  // продолжается: включённый трекер должен сразу показать честный остаток.
+  if ( !isShown(actor) ) return true;
 
   // Повторный вызов после «Всё равно использовать».
   if ( confirmed.has(activity) ) {

@@ -5,6 +5,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the module uses [semantic versioning](https://semver.org/).
 
 
+## [Unreleased]
+
+### Fixed
+
+- The shortage warning and confirmation no longer appear for characters whose tracker is switched
+  off. The warning now follows the same rule as the widget: it shows only when the tracker is on
+  for the character or the user turned it on for themselves. Spending is still recorded in the
+  background, so switching the tracker on shows the real remaining pools.
+
 ## [0.1.5] — 2026-10-05
 
 - fix: pack extra attacks after green pips and remove spent attack pips
